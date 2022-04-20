@@ -1,10 +1,12 @@
 var issueContainerEl = document.querySelector("#issues-container");
 var limitWarningEl = document.querySelector("#limit-warning");
+var repoNameEl = document.querySelector("#repo-name");
 
 var getRepoIssues = function(repo) {
     console.log(repo);
     var apiUrl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
 
+    // make a get request to url
     fetch(apiUrl).then(function(response) {
         // request was successful
         if (response.ok) {
@@ -14,16 +16,32 @@ var getRepoIssues = function(repo) {
 
                 // check if api has paginated issues
                 if (response.headers.get("Link")) {
-                    console.log(displayWarning(repo));
+                    displayWarning(repo);
                 }
             });
         } 
         else {
-            alert("There was a problem with your request!");
+            // if not successful, redirect to homepage
+            document.location.replace("./index.html");
         }
     });
 };
 
+var getRepoName =function() {
+    // grab repo name from url query string
+    var queryString = document.location.search;
+    var repoName = queryString.split("=")[1];
+
+    if(repoName) { 
+        // display repo name on the page
+        repoNameEl.textContent = repoName;
+        
+        getRepoIssues(repoName);
+} else { 
+    // if no repo was given, redirect to the homepage
+    document.location.replace("./index.html");
+}
+};
 var displayIssues = function(issues) {
     if (issues.length === 0) {
         issueContainerEl.textContent = "This repo has no open issues!";
@@ -74,3 +92,5 @@ var displayWarning = function(repo) {
 
  // append to warning container
  limitWarningEl.appendChild(linkEl);
+
+ getRepoName();
